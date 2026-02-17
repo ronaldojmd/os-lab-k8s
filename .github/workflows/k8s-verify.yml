@@ -1,0 +1,50 @@
+name: Kubernetes Lab Verification
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  k8s-lab-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+      - name: Install kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+          kind version
+
+      - name: Create kind cluster
+        run: kind create cluster --name oslab
+
+      - name: Create namespace
+        run: kubectl create namespace os-lab
+
+      - name: Apply manifests
+        run: kubectl apply -k pods/
+
+      - name: Wait for pods
+        run: |
+          kubectl wait --for=condition=Ready pod --all -n os-lab --timeout=180s
+          kubectl get pods -n os-lab -o wide
+
+      - name: Verify smoke test
+        run: |
+          for pod in ubuntu debian alpine centos kali; do
+            echo ">> Checking $pod-pod"
+            kubectl exec -n os-lab $pod-pod -- sh -c 'cat /etc/os-release | grep ^NAME='
+          done
+
+      - name: Cleanup
+        if: always()
+        run: kind delete cluster --name oslab
