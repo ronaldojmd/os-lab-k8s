@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-pod
+  labels: { app: lab }
+spec:
+  containers: [{name: ubuntu, image: ubuntu, command: ["sleep", "infinity"]}]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debian-pod
+  labels: { app: lab }
+spec:
+  containers: [{name: debian, image: debian, command: ["sleep", "infinity"]}]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine-pod
+  labels: { app: lab }
+spec:
+  containers: [{name: alpine, image: alpine, command: ["sleep", "infinity"]}]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: centos-pod
+  labels: { app: lab }
+spec:
+  containers: [{name: centos, image: centos:7, command: ["sleep", "infinity"]}]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kali-pod
+  labels: { app: lab }
+spec:
+  containers: [{name: kali, image: kalilinux/kali-rolling, command: ["sleep", "infinity"]}]
